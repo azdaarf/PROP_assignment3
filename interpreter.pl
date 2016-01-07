@@ -12,12 +12,15 @@ Example call of the top level predicate run/2:
 
 run(InputFile,OutputFile):-
 	tokenize(InputFile,Program),
-	%parse(ParseTree,Program,[]),
-	parse(Program,[]),
+	parse(ParseTree,Program,[]),
+	%parse(Program,[]),
 	%evaluate(ParseTree,[],VariablesOut), 
 	output_result(OutputFile,ParseTree,VariablesOut).
+
+parse([]) --> [].
+parse(Tree) --> assignment(Tree).
 	
-parse(Program, Out):-
+assignment(Program, Out):-
 	id(Program, Bs),
 	assign(Bs, Cs),
 	expr(Cs, Ds),

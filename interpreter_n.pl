@@ -10,7 +10,7 @@ Example call of the top level predicate run/2:
 ?- run('program1.txt','myparsetree1.txt').
 ***/
 
-run(InputFile,OutputFile):-
+run(InputFile,OutputFile,ParseTree):-
 	tokenize(InputFile,Program),
 	parse(ParseTree,Program,[]),
 	%evaluate(ParseTree,[],VariablesOut),
@@ -75,23 +75,24 @@ write_list(Stream,[Ident = Value|Vars]):-
 %parse(ParseTree, Program, []):-
 	
 
-parse(assignment(ident(X), '=', Exp)) --> id(X), [=], expr(Exp), [;].
+parse(assignment(ident(X), '=', Exp)) --> id(X), [=], expression(Exp), [;].
 
-id(X) --> [X], { atom(X) }.
-
-expr(expression(Term)) --> term(Term).
-expr(expression(Term, Op, Exp)) --> term(Term), add_sub(Op), expr(Exp).
+expression(expression(T)) --> term(T).
+expression(expression(T, O, E)) --> term(T), (add_op(O); sub_op(O)), expression(E).	
 
 term(term(F)) --> factor(F).
-term(term(F, Op, Term)) --> factor(F), mul_div(Op), term(Term).
+term(term(F, O, T)) --> factor(F),(mul_op(O); div_op(O)), term(T).
 
-factor(factor(int(N))) --> num(N).
-factor(factor(Exp)) --> ['('], expr(Exp), [')'].
+factor([factor, num(N)]) --> num(N).
+factor(factor( '(' , E, ')' )) --> ['('], expression(E), [')'].
 
-add_sub(Op) --> [Op], { memberchk(Op, ['+', '-']) }.
-mul_div(Op) --> [Op], { memberchk(Op, ['*', '/']) }.
+id(X) --> [X], { atom(X) }.
+num(N) --> [N], { integer(N) }.
 
-num(N) --> [N], { number(N) }.
+%add_op(Op) --> [Op], { memberchk(Op, ['+', '-']) }.
+%sub_op(Op) --> [Op], { memberchk(Op, ['+', '-']) }.
+%mul_op(Op) --> [Op], { memberchk(Op, ['*', '/']) }.
+%div_op(Op) --> [Op], { memberchk(Op, ['*', '/']) }.
 
 
 	
