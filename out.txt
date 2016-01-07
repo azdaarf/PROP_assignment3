@@ -1,4 +1,0 @@
-PARSE TREE:
-int(_12619)
-
-EVALUATION:

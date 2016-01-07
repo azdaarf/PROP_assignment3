@@ -13,9 +13,73 @@ Example call of the top level predicate run/2:
 run(InputFile,OutputFile):-
 	tokenize(InputFile,Program),
 	%parse(ParseTree,Program,[]),
+	parse(Program,[]),
 	%evaluate(ParseTree,[],VariablesOut), 
 	output_result(OutputFile,ParseTree,VariablesOut).
+	
+parse(Program, Out):-
+	id(Program, Bs),
+	assign(Bs, Cs),
+	expr(Cs, Ds),
+	semicolon(Ds, Out).
+	
+id(Xs, Ys):- 
+	[Z|Zs] = Xs,
+	atomic(Z),
+	%id_sign(Z),
+	Ys = Zs.
+	
+assign(Xs, Ys):- 
+	[Z|Zs] = Xs,
+	assign_sign(Z),
+	Ys = Zs.
+	
+expr(Xs, Ys):- 
+	term(Xs, Ys).	
+	
+expr(In,Out):-
+	term(In,Ys),
+	[A|As] = Ys,
+	expr_sign(A),
+	expr(As, Out).
 
+term(Xs,Ys):-
+	factor(Xs, Ys).
+	
+term(In,Out):-
+	factor(In, Ys),
+	[A|As] = Ys,
+	term_sign(A),
+	term(As, Out).
+	
+factor(Xs, Ys):-
+	[Z|Zs] = Xs,
+	integer(Z),
+	%int(Z),
+	Ys = Zs.
+
+factor(In, Out):-
+	[A|As] = In,
+	left_paren(A),
+	expr(As, Ys),
+	[B|Bs] = Ys,
+	right_paren(B),
+	Out = Bs.
+	
+semicolon(Xs, Ys):-
+	[Z|Zs] = Xs,
+	semicolon_sign(Z),
+	Ys = Zs.
+	
+expr_sign('+').
+expr_sign('-').
+term_sign('*').
+term_sign('/').
+left_paren('(').
+right_paren(')').
+semicolon_sign(';').	
+assign_sign('=').	
+	
 output_result(OutputFile,ParseTree,Variables):- 
 	open(OutputFile,write,OutputStream),
 	write(OutputStream,'PARSE TREE:'), 

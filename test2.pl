@@ -1,3 +1,4 @@
+% parse([a,=,1,*,2,+,'(',3,-,4,')','/',5,';'],[]).
 parse(Program, Es):-
 	id(Program, Bs),
 	assign(Bs, Cs),
@@ -15,23 +16,52 @@ assign(Xs, Ys):-
 	assign_sign(Z),
 	Ys = Zs.
 	
+expr(In,Out):-
+	term(In,Ys),
+	[A|As] = Ys,
+	expr_sign(A),
+	expr(As, Out).
+	
 expr(Xs, Ys):- 
 	term(Xs, Ys).
+
+term(In,Out):-
+	factor(In, Ys),
+	[A|As] = Ys,
+	term_sign(A),
+	term(As, Out).
 	
 term(Xs,Ys):-
 	factor(Xs, Ys).
 	
 factor(Xs, Ys):-
 	[Z|Zs] = Xs,
-	%integer(Z),
-	int(Z),
+	integer(Z),
+	%int(Z),
 	Ys = Zs.
+
+factor(In, Out):-
+	[A|As] = In,
+	left_paren(A),
+	expr(As, Ys),
+	[B|Bs] = Ys,
+	right_paren(B),
+	Out = Bs.
 	
 semicolon(Xs, Ys):-
 	[Z|Zs] = Xs,
 	semicolon_sign(Z),
 	Ys = Zs.
 	
+expr_sign('+').
+expr_sign('-').
+term_sign('*').
+term_sign('/').
+left_paren('(').
+right_paren(')').
+semicolon_sign(';').	
+assign_sign('=').
+
 int(1).
 int(2).
 int(3).
@@ -43,9 +73,6 @@ id_sign(b).
 id_sign(c).
 id_sign(d).
 id_sign(e).
-semicolon_sign(';').	
-assign_sign('=').
-	
 
 	
 
