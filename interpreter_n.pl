@@ -72,32 +72,24 @@ write_list(Stream,[Ident = Value|Vars]):-
 	write_list(Stream,Vars).
 
 	
-parse(ParseTree, Program, []):-
-    parser(Program, []).
+%parse(ParseTree, Program, []):-
+	
 
-parser --> [].
-parser(ParseTree) --> assign(ParseTree).
+parse(assignment(ident(X), '=', Exp)) --> id(X), [=], expr(Exp), [;].
 
-assign(assignment(ident(X), '=', E)) --> id(X), [=], expression(E), [;].
+id(X) --> [X], { atom(X) }.
 
-expression(expression(T)) --> term(T).
-expression(expression(T, O, E)) --> term(T), (add_op(O); sub_op(O)), expression(E).	
+expr(expression(Term)) --> term(Term).
+expr(expression(Term, Op, Exp)) --> term(Term), add_sub(Op), expr(Exp).
 
 term(term(F)) --> factor(F).
-term(term(O, T)) --> (mul_op(O); div_op(O)), term(T).
+term(term(F, Op, Term)) --> factor(F), mul_div(Op), term(Term).
 
-factor([factor, int(N)]) --> num(N).
-factor(factor( '(' , E, ')' )) --> ['('], expression(E), [')'].
+factor(factor(int(N))) --> num(N).
+factor(factor(Exp)) --> ['('], expr(Exp), [')'].
 
-id(Xs, Ys):- 
-	[Z|Zs] = Xs,
-	atomic(Z),	
-	Ys = Zs.
-
-add_op --> [x].
-sub_op --> [-].
-mul_op --> [*].
-div_op --> [/].
+add_sub(Op) --> [Op], { memberchk(Op, ['+', '-']) }.
+mul_div(Op) --> [Op], { memberchk(Op, ['*', '/']) }.
 
 num(N) --> [N], { number(N) }.
 
