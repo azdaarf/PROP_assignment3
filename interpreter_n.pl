@@ -75,18 +75,18 @@ write_list(Stream,[Ident = Value|Vars]):-
 %parse(ParseTree, Program, []):-
 	
 
-parse(assignment(ident(X), '=', Exp)) --> id(X), [=], expression(Exp), [;].
+parse(assignment(ident(X), 'assign_op', E)) --> id(X), [=], expression1(E), [;].
 
-expression(expression(T)) --> term(T).
-expression(expression(T, O, E)) --> term(T), (add_op(O); sub_op(O)), expression(E).	
+expression1(expression(T)) --> term(T).
+expression1(expression(T, O, E)) --> term(T), (add_op(O); sub_op(O)), expression1(E).	
 
 term(term(F)) --> factor(F).
 term(term(F, O, T)) --> factor(F),(mul_op(O); div_op(O)), term(T).
 
-factor([factor, num(N)]) --> num(N).
-factor(factor( '(' , E, ')' )) --> ['('], expression(E), [')'].
+factor(factor(num(N))) --> num(N).
+factor(factor(E)) --> ['('], expression1(E), [')'].
 
-id(X) --> [X], { atom(X) }.
+id(ID) --> [ID], { atom(ID) }.
 num(N) --> [N], { integer(N) }.
 
 %add_op(Op) --> [Op], { memberchk(Op, ['+', '-']) }.

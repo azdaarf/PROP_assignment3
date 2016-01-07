@@ -1,0 +1,36 @@
+PARSE TREE:
+assignment
+	ident(a)
+	assign_op
+	expression
+		term
+			factor
+				num
+					1
+			*
+			term
+				factor
+					num
+						2
+		+
+		expression
+			term
+				factor
+					expression
+						term
+							factor
+								num
+									3
+						-
+						expression
+							term
+								factor
+									num
+										4
+				/
+				term
+					factor
+						num
+							5
+
+EVALUATION:
