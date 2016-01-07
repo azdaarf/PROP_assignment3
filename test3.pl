@@ -1,5 +1,5 @@
 parse(-ParseTree, +Program, []):-
-    parsor(+Program, []).
+    parser(+Program, []).
 
 parser --> [].
 parser --> assign.
