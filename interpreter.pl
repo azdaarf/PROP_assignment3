@@ -17,8 +17,7 @@ run(InputFile,OutputFile):-
 	%evaluate(ParseTree,[],VariablesOut), 
 	output_result(OutputFile,ParseTree,VariablesOut).
 
-parse([]) --> [].
-parse(Tree) --> assignment(Tree).
+
 
 output_result(OutputFile,ParseTree,Variables):- 
 	open(OutputFile,write,OutputStream),
@@ -75,32 +74,36 @@ write_list(Stream,[Ident = Value|Vars]):-
 	nl(Stream), 
 	write_list(Stream,Vars).
 	
+	
 /***
 parse(-ParseTree)-->
 	TODO: Implement a definite clause grammar defining our programming language,
 	and returning a parse tree.
 ***/
 
-parse(parseTree) --> id, assign, expr, semicolon.
-id --> [X], {atomic(X)}.
-assign --> ['='].
-expr --> term.
-expr --> term, add_op, expr. 
-expr --> term, sub_op, expr.
-term --> factor.
-term --> factor, mult_op, term.
-term --> factor, div_op, term.
-factor --> [X], {integer(X)}.
-factor --> left_paren, expr, right_paren.
 
-left_paren --> ['('].
-right_paren --> [')'].
-add_op --> ['+'].
-sub_op --> ['-'].
-div_op --> ['/'].
-mult_op --> ['*'].
-semicolon --> [';'].
-	
+parse(assignment(ident(X), 'assign_op', E, S)) --> id(X), [=], expr(E), semi_colon(S).
+
+expr(expression(T)) --> term1(T).
+expr(expression(T, O, E)) --> term1(T), (add_op(O); sub_op(O)), expr(E).
+
+term1(term(F)) --> factor1(F).
+term1(term(F, O, T)) --> factor1(F), (mult_op(O); div_op(O)), term1(T).
+
+factor1(factor(int(N))) --> num(N).
+factor1(factor(L,E,R)) --> left_paren(L), expr(E), right_paren(R).
+
+num(X) --> [X], { number(X) }.
+id(X) --> [X], { atom(X) }.
+
+add_op('add_op') --> ['+'].
+sub_op('sub_op') --> ['-'].
+div_op('div_op') --> ['/'].
+mult_op('div_op') --> ['*'].
+left_paren('left_paren') --> ['('].
+right_paren('right_paren') --> [')'].
+semi_colon('semi_colon') --> [';'].
+
 /***
 evaluate(+ParseTree,+VariablesIn,-VariablesOut):-
 	TODO: Implement an evaluate predicate that evaluates a parse-tree and 
