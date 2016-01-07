@@ -10,7 +10,7 @@ Example call of the top level predicate run/2:
 ?- run('program1.txt','myparsetree1.txt').
 ***/
 
-run(InputFile,OutputFile):-
+run(InputFile,OutputFile,ParseTree):-
 	tokenize(InputFile,Program),
 	parse(ParseTree,Program,[]),
 	%evaluate(ParseTree,[],VariablesOut),
@@ -72,34 +72,27 @@ write_list(Stream,[Ident = Value|Vars]):-
 	write_list(Stream,Vars).
 
 	
-parse(ParseTree, Program, []):-
-    parser(Program, []).
+%parse(ParseTree, Program, []):-
+	
 
-parser --> [].
-parser(ParseTree) --> assign(ParseTree).
+parse(assignment(ident(X), 'assign_op', E)) --> id(X), [=], expression1(E), [;].
 
-assign(assignment(ident(X), '=', E)) --> id(X), [=], expression(E), [;].
-
-expression(expression(T)) --> term(T).
-expression(expression(T, O, E)) --> term(T), (add_op(O); sub_op(O)), expression(E).	
+expression1(expression(T)) --> term(T).
+expression1(expression(T, O, E)) --> term(T), (add_op(O); sub_op(O)), expression1(E).	
 
 term(term(F)) --> factor(F).
-term(term(O, T)) --> (mul_op(O); div_op(O)), term(T).
+term(term(F, O, T)) --> factor(F),(mul_op(O); div_op(O)), term(T).
 
-factor([factor, int(N)]) --> num(N).
-factor(factor( '(' , E, ')' )) --> ['('], expression(E), [')'].
+factor(factor(num(N))) --> num(N).
+factor(factor(E)) --> ['('], expression1(E), [')'].
 
-id(Xs, Ys):- 
-	[Z|Zs] = Xs,
-	atomic(Z),	
-	Ys = Zs.
+id(ID) --> [ID], { atom(ID) }.
+num(N) --> [N], { integer(N) }.
 
-add_op --> [x].
-sub_op --> [-].
-mul_op --> [*].
-div_op --> [/].
-
-num(N) --> [N], { number(N) }.
+%add_op(Op) --> [Op], { memberchk(Op, ['+', '-']) }.
+%sub_op(Op) --> [Op], { memberchk(Op, ['+', '-']) }.
+%mul_op(Op) --> [Op], { memberchk(Op, ['*', '/']) }.
+%div_op(Op) --> [Op], { memberchk(Op, ['*', '/']) }.
 
 
 	
